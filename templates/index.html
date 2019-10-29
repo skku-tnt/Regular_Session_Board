@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="kr" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>TNT 실습보드</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <!-- SocektIO -->
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      function check_connection(socket){
+        socket.on('response', function(msg){
+          console.log(msg.data)
+        })
+      };
+
+      function make_empty_table(){
+        var col;
+        for (i=0;col<15;i++) {
+          text += cars[i] + "<br>";
+        }
+      }
+
+      function make_table(socket){
+        socket.on('result', function(msg){
+          var names = Object.keys(msg.data);
+          var questions = Object.keys(msg.data[names[0]]);
+
+          var thead_cnt = '<tr> <th> # </th>';
+          for (i=0;i<names.length;i++){
+            thead_cnt += '<th>' + names[i] + '</th> </tr>';
+          }
+          document.getElementById('names').innerHTML = thead_cnt
+
+          var tbody_cnt = '';
+          for(j=0;j<5;j++){
+            tbody_cnt += '<tr>';
+            if (typeof questions[j] == 'undefined') {
+              questions[j] = '';
+            }
+            tbody_cnt += '<td>' + questions[j] + '</td>';
+            for (var c in names){
+              var cnt = msg.data[names[c]][questions[j]];
+              if (typeof cnt == "undefined") {
+                cnt = '';}
+              tbody_cnt += '<td>' + cnt + '</td>'
+            }
+            tbody_cnt += '</tr>'
+          }
+          document.getElementById('scores').innerHTML = tbody_cnt;
+        })
+      };
+
+      var socket = io.connect('http://' + '{{IP}}' + ':' + '{{PORT}}');
+      check_connection(socket);
+      make_table(socket);
+    </script>
+
+    <h1>TNT 실습보드</h1>
+    <table class='table'>
+      <thead class='thead-dark'>
+        <tr id='names'>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id='scores'></tbody>
+    </table>
+  </body>
+</html>
